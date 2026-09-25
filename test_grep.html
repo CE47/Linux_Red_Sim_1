@@ -884,7 +884,7 @@ const missions = [
   },
   {
     text: 'Now find <b>info</b> — but it is written in CAPS in the file.',
-    hint: 'The <code>-i</code> flag means "ignore case". Type: <code>grep -i info server.log</code>',
+    hint: 'The <code>-i</code> flag means "ignore case". Type: <code>grep -i INFO server.log</code>',
     answer: 'grep -i info server.log',
     check: c => c.flags.i && c.pattern.toLowerCase() === 'info' && c.total > 0
   },
