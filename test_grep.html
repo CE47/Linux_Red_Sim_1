@@ -490,14 +490,14 @@ const PS = 'you@linux:~/logs';
 /* ==================================================================
    3. TEXT HELPERS
    ================================================================== */
-function makeRegex(pattern, flags) {
-  try { return new RegExp(pattern, flags.i ? 'gi' : 'g'); }
+function makeRegex(pattern, ignoreCase) {
+  try { return new RegExp(pattern, ignoreCase ? 'gi' : 'g'); }
   catch (e) { return null; }
 }
 
 /* wrap matches in <mark> */
 function highlight(text, pattern, flags) {
-  const re = makeRegex(pattern, flags);
+  const re = makeRegex(pattern, flags.i);   // was: makeRegex(pattern, flags)
   if (!re) return esc(text);
   let out = '', last = 0, m, guard = 0;
   while ((m = re.exec(text)) !== null && guard++ < 300) {
