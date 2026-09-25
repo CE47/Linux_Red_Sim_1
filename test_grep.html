@@ -367,6 +367,12 @@ mark{
 @keyframes fall{to{transform:translateY(108vh) rotate(var(--rot,360deg));opacity:.05}}
 
 /* ============ RESPONSIVE ============ */
+@media (min-width:901px){
+  .term{
+    flex:0 0 clamp(240px,42vh,420px);
+    overflow-y:auto;
+  }
+}
 @media (max-width:900px){
   .app{padding:12px 12px 16px;gap:10px}
   main{grid-template-columns:1fr;grid-template-rows:auto auto;flex:none}
